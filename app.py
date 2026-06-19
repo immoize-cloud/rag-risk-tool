@@ -39,32 +39,22 @@ def query_rag(headline, k=5):
     faiss.normalize_L2(query_vec)
     distances, indices = index.search(query_vec, k)
 
+    assets = ['SPY', 'GLD', 'TLT', 'USO']
+    horizons = ['1d', '3d', '5d', '21d', '63d']
+    return_cols = [f'{a}_return_{h}' for a in assets for h in horizons]
+
     results = []
     for rank, (idx, score) in enumerate(zip(indices[0], distances[0]), 1):
         row = df.iloc[idx]
-        results.append({
+        record = {
             'rank': rank,
             'similarity': round(float(score), 4),
             'date': row['date'].date(),
             'headline': row['headline'][:160],
-            'SPY_return_1d': row['SPY_return_1d'],
-            'SPY_return_3d': row['SPY_return_3d'],
-            'SPY_return_5d': row['SPY_return_5d'],
-            'SPY_return_21d': row['SPY_return_21d'],
-            'SPY_return_63d': row['SPY_return_63d'],
-            'GLD_return_1d': row['GLD_return_1d'],
-            'GLD_return_5d': row['GLD_return_5d'],
-            'GLD_return_21d': row['GLD_return_21d'],
-            'GLD_return_63d': row['GLD_return_63d'],
-            'TLT_return_1d': row['TLT_return_1d'],
-            'TLT_return_5d': row['TLT_return_5d'],
-            'TLT_return_21d': row['TLT_return_21d'],
-            'TLT_return_63d': row['TLT_return_63d'],
-            'USO_return_1d': row['USO_return_1d'],
-            'USO_return_5d': row['USO_return_5d'],
-            'USO_return_21d': row['USO_return_21d'],
-            'USO_return_63d': row['USO_return_63d'],
-        })
+        }
+        for col in return_cols:
+            record[col] = row[col]
+        results.append(record)
     return pd.DataFrame(results)
 
 
